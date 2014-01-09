@@ -163,18 +163,18 @@ tSpiInformation sSpiInformation;
 // *CCS does not initialize variables - therefore, __no_init is not needed.                             ///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __CCS__
-unsigned char wlan_rx_buffer[CC3000_RX_BUFFER_SIZE];
-unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
-unsigned char chBuffer[CC3000_RX_BUFFER_SIZE];
-#pragma DATA_ALIGN(ucDMAChannelControlStructure, 1024);
-static unsigned char ucDMAChannelControlStructure[DMA_CHANNEL_CONTROL_STRUCTURE_SIZE];
-#elif __IAR_SYSTEMS_ICC__
+#ifdef __IAR_SYSTEMS_ICC__
 __no_init unsigned char wlan_rx_buffer[CC3000_RX_BUFFER_SIZE];
 __no_init unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
 __no_init unsigned char chBuffer[CC3000_RX_BUFFER_SIZE];
 #pragma data_alignment=1024
 __no_init static unsigned char ucDMAChannelControlStructure[DMA_CHANNEL_CONTROL_STRUCTURE_SIZE];
+#else
+unsigned char wlan_rx_buffer[CC3000_RX_BUFFER_SIZE];
+unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
+unsigned char chBuffer[CC3000_RX_BUFFER_SIZE];
+#pragma DATA_ALIGN(ucDMAChannelControlStructure, 1024);
+static unsigned char ucDMAChannelControlStructure[DMA_CHANNEL_CONTROL_STRUCTURE_SIZE];
 #endif
 
 

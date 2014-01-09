@@ -50,7 +50,6 @@
 #include "driverlib/systick.h"
 #include "driverlib/fpu.h"
 #include "driverlib/debug.h"
-#include "grlib/grlib.h"
 
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"
@@ -362,7 +361,7 @@ void turnLedOn(char ledNum)
 		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, PIN_LOW);
 		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, PIN_LOW);
 		//turn RED LED on
-		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
+		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, PIN_HIGH);
 		break;
 		
 		//Blue
@@ -371,7 +370,7 @@ void turnLedOn(char ledNum)
 		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, PIN_LOW);
 		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, PIN_LOW);
 		//turn BLUE LED on
-		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2);
+		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, PIN_HIGH);
 		break;
 		
 		//Green
@@ -380,7 +379,7 @@ void turnLedOn(char ledNum)
 		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, PIN_LOW);
 		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, PIN_LOW);
 		//turn GREEN LED on
-		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3);
+		MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, PIN_HIGH);
 		break;
 	}
 }

@@ -57,11 +57,10 @@
 //                                                2.  __IAR_SYSTEMS_ICC__ for IAR Embedded Workbench    ///
 // *CCS does not initialize variables - therefore, __no_init is not needed.                             ///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __CCS__
-unsigned char g_ucUARTBuffer[UART_IF_BUFFER];
-#elif __IAR_SYSTEMS_ICC__
+#ifdef __IAR_SYSTEMS_ICC__
 __no_init unsigned char g_ucUARTBuffer[UART_IF_BUFFER];
-
+#else
+unsigned char g_ucUARTBuffer[UART_IF_BUFFER];
 #endif
 volatile unsigned char uart_have_cmd = 0;
 volatile unsigned long g_ulRxBuffCount =0;

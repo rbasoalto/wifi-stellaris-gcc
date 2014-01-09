@@ -49,7 +49,6 @@
 #include "driverlib/systick.h"
 #include "driverlib/fpu.h"
 #include "driverlib/debug.h"
-#include "grlib/grlib.h"
 
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"
@@ -136,13 +135,13 @@ char digits[] = "0123456789";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Reception from the air, buffer - the max data length  + headers
 //
-#ifdef __CCS__
-
-unsigned char pucCC3000_Rx_Buffer[CC3000_APP_BUFFER_SIZE + CC3000_RX_BUFFER_OVERHEAD_SIZE];
-
-#elif __IAR_SYSTEMS_ICC__
+#ifdef __IAR_SYSTEMS_ICC__
 
 __no_init unsigned char pucCC3000_Rx_Buffer[CC3000_APP_BUFFER_SIZE + CC3000_RX_BUFFER_OVERHEAD_SIZE];
+
+#else
+
+unsigned char pucCC3000_Rx_Buffer[CC3000_APP_BUFFER_SIZE + CC3000_RX_BUFFER_OVERHEAD_SIZE];
 
 #endif
 

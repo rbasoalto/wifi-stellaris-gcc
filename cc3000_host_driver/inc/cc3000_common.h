@@ -326,12 +326,12 @@ typedef long int __fd_mask;
 #define __FDELT(d)              ((d) / __NFDBITS)
 #define __FDMASK(d)             ((__fd_mask) 1 << ((d) % __NFDBITS))
 
-// fd_set for select and pselect.
-typedef struct
-{
-    __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
-#define __FDS_BITS(set)        ((set)->fds_bits)
-} fd_set;
+// // fd_set for select and pselect.
+// typedef struct
+// {
+//     __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
+// #define __FDS_BITS(set)        ((set)->fds_bits)
+// } fd_set;
 
 // We don't use `memset' because this would require a prototype and
 //   the array isn't too big.

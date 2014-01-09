@@ -35,6 +35,7 @@
 #ifndef __C_SOCKET_H__
 #define __C_SOCKET_H__
 
+#include <sys/types.h>
 #include "cc3000_common.h"
 
 //*****************************************************************************
