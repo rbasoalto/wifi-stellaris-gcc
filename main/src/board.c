@@ -51,6 +51,13 @@
 #include "driverlib/fpu.h"
 #include "driverlib/debug.h"
 
+#include "inc/hw_memmap.h"
+#include "inc/hw_gpio.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/rom.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/gpio.h"
+
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"
 #include "driverlib/ssi.h"
@@ -58,6 +65,7 @@
 #include "dispatcher.h"
 #include "spi_version.h"
 #include "board.h"
+
 
 
 
@@ -323,6 +331,16 @@ void initLEDs()
 {
 	// Enable use of PORTF to toggle LED and disable interrupt on this port
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    //
+    // Unlock PF0 so we can change it to a GPIO input
+    // Once we have enabled (unlocked) the commit register then re-lock it
+    // to prevent further changes.  PF0 is muxed with NMI thus a special case.
+    //
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY_DD;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_CR) |= 0x01;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = 0;
+
+    
 	MAP_GPIOPinIntDisable(GPIO_PORTF_BASE, 0xFF);
 	
 	// Configure Red LED
@@ -337,6 +355,11 @@ void initLEDs()
 	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
 	MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, PIN_LOW); 
 	
+    
+    // Button inputs
+	ROM_GPIODirModeSet(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, GPIO_DIR_MODE_IN);
+    ROM_GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+
 }
 //*****************************************************************************
 //

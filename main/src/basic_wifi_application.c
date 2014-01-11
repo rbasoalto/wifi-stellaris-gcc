@@ -50,6 +50,10 @@
 #include "driverlib/fpu.h"
 #include "driverlib/debug.h"
 
+#include "driverlib/rom.h"
+
+#include "driverlib/gpio.h"
+
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"
 #include "driverlib/ssi.h"
@@ -108,14 +112,14 @@ const char aucCC3000_prefix[] = {'T', 'T', 'T'};
 
 
 // Indications that UART command has finished etc
-const unsigned char pucUARTCommandDoneString[] = {'\f', '\r', 'D', 'O', 'N', 'E', '\f', '\r'};
-const unsigned char pucUARTCommandSmartConfigDoneString[] = {'\f', '\r','S', 'm', 'a', 'r', 't',' ', 'c', 'o', 'n', 'f', 'i', 'g', ' ',  'D', 'O', 'N', 'E', '\f', '\r'};
-const unsigned char pucUARTExampleAppString[] = {'\f', '\r','E', 'x', 'a', 'm', 'p', 'l', 'e', ' ', 'A', 'p', 'p', ':', 'd', 'r', 'i', 'v', 'e', 'r', ' ', 'v', 'e', 'r', 's', 'i', 'o', 'n', ' ' };
-const unsigned char pucUARTNoDataString[] = {'\f', '\r', 'N', 'o', ' ', 'd', 'a', 't', 'a', ' ', 'r', 'e', 'c','e', 'i', 'v', 'e', 'd', '\f', '\r'};
-const unsigned char pucUARTIllegalCommandString[] = {'\f', '\r', 'I', 'l', 'l', 'e', 'g', 'a', 'l', ' ', 'c', 'o','m', 'm', 'a', 'n', 'd', '\f', '\r'};
+const unsigned char pucUARTCommandDoneString[] = {'\r', '\n', 'D', 'O', 'N', 'E', '\r', '\n'};
+const unsigned char pucUARTCommandSmartConfigDoneString[] = {'\r', '\n','S', 'm', 'a', 'r', 't',' ', 'c', 'o', 'n', 'f', 'i', 'g', ' ',  'D', 'O', 'N', 'E', '\r', '\n'};
+const unsigned char pucUARTExampleAppString[] = {'\r', '\n','E', 'x', 'a', 'm', 'p', 'l', 'e', ' ', 'A', 'p', 'p', ':', 'd', 'r', 'i', 'v', 'e', 'r', ' ', 'v', 'e', 'r', 's', 'i', 'o', 'n', ' ' };
+const unsigned char pucUARTNoDataString[] = {'\r', '\n', 'N', 'o', ' ', 'd', 'a', 't', 'a', ' ', 'r', 'e', 'c','e', 'i', 'v', 'e', 'd', '\r', '\n'};
+const unsigned char pucUARTIllegalCommandString[] = {'\r', '\n', 'I', 'l', 'l', 'e', 'g', 'a', 'l', ' ', 'c', 'o','m', 'm', 'a', 'n', 'd', '\r', '\n'};
 
 //device name used by smart config response
-char device_name[] = "home_assistant";
+char device_name[] = "CC3000A";
  	
 //AES key "smartconfigAES16"
 const unsigned char smartconfigkey[] = {0x73,0x6d,0x61,0x72,0x74,0x63,0x6f,0x6e,0x66,0x69,0x67,0x41,0x45,0x53,0x31,0x36};
@@ -124,7 +128,8 @@ unsigned char printOnce = 1;
 
 char digits[] = "0123456789";
 
-
+const char* svcHost = "meowmix.rbw.cl";
+const char* svcLocalURI = "/apitest";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////      
 //__no_init is used to prevent the buffer initialization in order to prevent hardware WDT expiration    ///
@@ -425,8 +430,8 @@ void CC3000_UsynchCallback(long lEventType, char *data, unsigned char length)
 			*ccPtr++ = '.';
 			ccLen = itoa(data[0], ccPtr);
 			ccPtr += ccLen;
-			*ccPtr++ = '\f';
 			*ccPtr++ = '\r';
+			*ccPtr++ = '\n';
 			*ccPtr++ = '\0';
 
 			ulCC3000DHCP = 1;
@@ -511,8 +516,8 @@ initDriver(void)
 		*ccPtr++ = '.';
 		ccLen = itoa(DRIVER_VERSION_NUMBER, ccPtr);
 		ccPtr += ccLen;
-		*ccPtr++ = '\f';
 		*ccPtr++ = '\r';
+		*ccPtr++ = '\n';
 		*ccPtr++ = '\0';		
 		DispatcherUartSendPacket((unsigned char*)cc3000IP, strlen(cc3000IP));
 	}
@@ -782,7 +787,6 @@ DemoHandleUartCommand(unsigned char *usBuffer)
 		}
 		
 		break;
-		
 	default:
 		DispatcherUartSendPacket((unsigned char*)pucUARTIllegalCommandString, 
 														 sizeof(pucUARTIllegalCommandString));
@@ -794,6 +798,100 @@ DemoHandleUartCommand(unsigned char *usBuffer)
 	DispatcherUartSendPacket((unsigned char *)(pucUARTCommandDoneString), 
 													 sizeof(pucUARTCommandDoneString));
 }
+
+#define UART_ERROR_PRINT(str) (DispatcherUartSendPacket(str "\r\n", strlen(str "\r\n")));
+
+void PrintIPConfig(void) {
+    char localPrintBuffer[512];
+    tNetappIpconfigRetArgs ipconfigdata;
+    
+    UART_ERROR_PRINT("Gonna display ipconfig");
+    
+    
+    netapp_ipconfig(&ipconfigdata);
+    
+    UART_ERROR_PRINT("Ready to display ipconfig");
+    
+    char* bufPtr = localPrintBuffer;
+    memcpy(bufPtr, "IP: ", sizeof("IP: "));
+    bufPtr += sizeof("IP: ");
+    bufPtr += itoa(ipconfigdata.aucIP[0], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucIP[1], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucIP[2], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucIP[3], bufPtr);
+    *(bufPtr++) = '\r';
+    *(bufPtr++) = '\n';
+    memcpy(bufPtr, "DNS: ", sizeof("DNS: "));
+    bufPtr += sizeof("DNS: ");
+    bufPtr += itoa(ipconfigdata.aucDNSServer[0], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucDNSServer[1], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucDNSServer[2], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucDNSServer[3], bufPtr);
+    *(bufPtr++) = '\r';
+    *(bufPtr++) = '\n';
+    *(bufPtr++) = '\0';
+    
+    DispatcherUartSendPacket((unsigned char*)localPrintBuffer, strlen(localPrintBuffer));
+    
+    
+}
+
+void ConnectToAPI(void) {
+    
+    PrintIPConfig();
+    
+    UART_ERROR_PRINT("Connecting to API!");
+    int sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    unsigned long destIp = 0;
+    int hbnresult = gethostbyname(svcHost, strlen(svcHost), destIp);
+    
+    if (hbnresult == EFAIL) {
+        UART_ERROR_PRINT("GHBN retorna EFAIL");
+        return;
+    }
+    
+    if (!destIp) {
+        UART_ERROR_PRINT("No pude resolver el hostname");
+        return;
+    }
+    
+    if (sd < 0) {
+        UART_ERROR_PRINT("No pude crear socket");
+        return;
+    }
+    sockaddr sa;
+    sa.sa_family = AF_INET;
+    sa.sa_data[0] = 0; sa.sa_data[1] = 80; // port 80
+    *((unsigned long *) &sa.sa_data[2]) = destIp; //dest ip
+
+    memset(sa.sa_data+6, 0, (14-6)*sizeof(sa.sa_data[0])); //zero-out the rest
+    if(connect(sd, &sa, sizeof(sa)) != 0) {
+        UART_ERROR_PRINT("No pude conectar");
+        closesocket(sd);
+        return;
+    }
+
+    const char* dataToSend = "POST /apitest HTTP/1.1\nContent-type: text/json\nContent-length: 14\nConnection: close\n\n{\"test\": true}";
+
+    if (send(sd, dataToSend, strlen(dataToSend), 0) != strlen(dataToSend)) {
+        UART_ERROR_PRINT("#bytes enviados distintos");
+        closesocket(sd);
+        return;
+    }
+
+    if (closesocket(sd) != 0) {
+        UART_ERROR_PRINT("Error al cerrar socket");
+        return;
+    }
+}
+
+#undef UART_ERROR_PRINT
 
 //*****************************************************************************
 //
@@ -807,7 +905,7 @@ DemoHandleUartCommand(unsigned char *usBuffer)
 //
 //*****************************************************************************
 
-main(void)
+int main(void)
 {
 
 	ulCC3000DHCP = 0;
@@ -825,7 +923,7 @@ main(void)
 	
 	// Loop forever waiting  for commands from PC...  
 	while(1)
-	{	
+	{
 		if (uart_have_cmd && !(UARTBusy(UART0_BASE)) )
 		{   
 			
@@ -864,6 +962,12 @@ main(void)
 			printOnce = 0;
 			DispatcherUartSendPacket((unsigned char*)pucCC3000_Rx_Buffer, strlen((char const*)pucCC3000_Rx_Buffer));
 		}
+        
+        unsigned long buttonsstate = ROM_GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);
+        
+        if (ulCC3000Connected == 1 && !(buttonsstate & GPIO_PIN_0)) {
+            ConnectToAPI();
+        }
 		
 	}  
 }

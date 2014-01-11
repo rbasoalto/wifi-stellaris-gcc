@@ -32,6 +32,7 @@ CFLAGS = [
   '-Wall',
   '-pedantic',
   '-DPART_'+PART,
+  '-DTARGET_IS_BLIZZARD_RA1',
 ]
 
 LD_TEMPLATE = 'lm4f120h5qr.ld'
