@@ -21,8 +21,8 @@ AFLAGS = [
 ]
 
 CFLAGS = [
-  '-g',
-  '-O0',
+  '-g', '-O0',
+#  '-Os',
   '-mthumb',
   CPU,
   FPU,

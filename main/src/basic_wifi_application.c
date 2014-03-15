@@ -165,10 +165,10 @@ unsigned char pucCC3000_Rx_Buffer[CC3000_APP_BUFFER_SIZE + CC3000_RX_BUFFER_OVER
 //! @brief  Convert integer to ASCII in decimal base
 //
 //*****************************************************************************
-unsigned short itoa(char cNum, char *cString)
+unsigned short itoa(short cNum, char *cString)
 {
 	char* ptr;
-	char uTemp = cNum;
+	short uTemp = cNum;
 	unsigned short length;
 	
 	// value 0 is a special case
@@ -215,7 +215,7 @@ unsigned short itoa(char cNum, char *cString)
 unsigned char
 atoc(char data)
 {
-	unsigned char ucRes;
+	unsigned char ucRes = data;
 	
 	if ((data >= 0x30) && (data <= 0x39))
 	{
@@ -813,6 +813,15 @@ void PrintIPConfig(void) {
     UART_ERROR_PRINT("Ready to display ipconfig");
     
     char* bufPtr = localPrintBuffer;
+    memcpy(bufPtr, "DNS: ", sizeof("DNS: "));
+    bufPtr += sizeof("DNS: ");
+    bufPtr += itoa(ipconfigdata.aucDNSServer[0], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucDNSServer[1], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucDNSServer[2], bufPtr);
+    *(bufPtr++) = '.';
+    bufPtr += itoa(ipconfigdata.aucDNSServer[3], bufPtr);
     memcpy(bufPtr, "IP: ", sizeof("IP: "));
     bufPtr += sizeof("IP: ");
     bufPtr += itoa(ipconfigdata.aucIP[0], bufPtr);
@@ -824,15 +833,6 @@ void PrintIPConfig(void) {
     bufPtr += itoa(ipconfigdata.aucIP[3], bufPtr);
     *(bufPtr++) = '\r';
     *(bufPtr++) = '\n';
-    memcpy(bufPtr, "DNS: ", sizeof("DNS: "));
-    bufPtr += sizeof("DNS: ");
-    bufPtr += itoa(ipconfigdata.aucDNSServer[0], bufPtr);
-    *(bufPtr++) = '.';
-    bufPtr += itoa(ipconfigdata.aucDNSServer[1], bufPtr);
-    *(bufPtr++) = '.';
-    bufPtr += itoa(ipconfigdata.aucDNSServer[2], bufPtr);
-    *(bufPtr++) = '.';
-    bufPtr += itoa(ipconfigdata.aucDNSServer[3], bufPtr);
     *(bufPtr++) = '\r';
     *(bufPtr++) = '\n';
     *(bufPtr++) = '\0';
@@ -924,20 +924,20 @@ int main(void)
 	// Loop forever waiting  for commands from PC...  
 	while(1)
 	{
-		if (uart_have_cmd && !(UARTBusy(UART0_BASE)) )
-		{   
-			
-			while(UARTBusy(UART0_BASE));
-			
-			//Process the cmd in RX buffer
-			DemoHandleUartCommand(g_ucUARTBuffer);
-			
-			//Clear cmd and reset buffer pointer 
-			
-			uart_have_cmd = 0;
-			memset(g_ucUARTBuffer, 0xFF, UART_IF_BUFFER);			
-
-		}
+    // if (uart_have_cmd && !(UARTBusy(UART0_BASE)) )
+    // {   
+    //   
+    //   while(UARTBusy(UART0_BASE));
+    //   
+    //   //Process the cmd in RX buffer
+    //   DemoHandleUartCommand(g_ucUARTBuffer);
+    //   
+    //   //Clear cmd and reset buffer pointer 
+    //   
+    //   uart_have_cmd = 0;
+    //   memset(g_ucUARTBuffer, 0xFF, UART_IF_BUFFER);      
+    // 
+    // }
 		
 		// complete smart config process:
 		// 1. if smart config is done 
@@ -957,11 +957,11 @@ int main(void)
 			ucStopSmartConfig = 0;
 		}
 		
-		if( (ulCC3000DHCP == 1) && (ulCC3000Connected == 1)  && (printOnce == 1) ) 
-		{
-			printOnce = 0;
-			DispatcherUartSendPacket((unsigned char*)pucCC3000_Rx_Buffer, strlen((char const*)pucCC3000_Rx_Buffer));
-		}
+    // if( (ulCC3000DHCP == 1) && (ulCC3000Connected == 1)  && (printOnce == 1) ) 
+    // {
+    //   printOnce = 0;
+    //   DispatcherUartSendPacket((unsigned char*)pucCC3000_Rx_Buffer, strlen((char const*)pucCC3000_Rx_Buffer));
+    // }
         
         unsigned long buttonsstate = ROM_GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);
         

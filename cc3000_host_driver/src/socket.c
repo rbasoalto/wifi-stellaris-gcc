@@ -596,7 +596,7 @@ connect(long sd, const sockaddr *addr, long addrlen)
 //*****************************************************************************
 
 int
-select(long nfds, fd_set *readsds, fd_set *writesds, fd_set *exceptsds, 
+select(long nfds, cc_fd_set *readsds, cc_fd_set *writesds, cc_fd_set *exceptsds, 
        struct timeval *timeout)
 {
 	unsigned char *ptr, *args;
@@ -1023,7 +1023,8 @@ simple_link_send(long sd, const void *buf, long len, long flags,
 		
 	default:
 		{
-			break;
+			//break;
+      return -1;
 		}
 	}
 	
@@ -1035,7 +1036,14 @@ simple_link_send(long sd, const void *buf, long len, long flags,
 	
 	if (opcode == HCI_CMND_SENDTO)
 	{
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 		args = UINT32_TO_STREAM(args, addr_offset);
+#if __GNUC__
+#pragma GCC diagnostic pop
+#endif
 		args = UINT32_TO_STREAM(args, addrlen);
 	}
 	

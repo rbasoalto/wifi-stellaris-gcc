@@ -693,11 +693,21 @@ wlan_add_profile(unsigned long ulSecType,
 		}
 		
 		break;
+
+        default:
+          return -1; /* unsupported security type */
 	}    
 	
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 	// Initiate a HCI command
 	hci_command_send(HCI_CMND_WLAN_IOCTL_ADD_PROFILE,
 									 ptr, arg_len);
+#if __GNUC__
+#pragma GCC diagnostic pop
+#endif
 	
 	// Wait for command complete event
 	SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_ADD_PROFILE, &ret);

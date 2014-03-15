@@ -163,19 +163,11 @@ tSpiInformation sSpiInformation;
 // *CCS does not initialize variables - therefore, __no_init is not needed.                             ///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __IAR_SYSTEMS_ICC__
-__no_init unsigned char wlan_rx_buffer[CC3000_RX_BUFFER_SIZE];
-__no_init unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
-__no_init unsigned char chBuffer[CC3000_RX_BUFFER_SIZE];
-#pragma data_alignment=1024
-__no_init static unsigned char ucDMAChannelControlStructure[DMA_CHANNEL_CONTROL_STRUCTURE_SIZE];
-#else
+
 unsigned char wlan_rx_buffer[CC3000_RX_BUFFER_SIZE];
 unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
 unsigned char chBuffer[CC3000_RX_BUFFER_SIZE];
-#pragma DATA_ALIGN(ucDMAChannelControlStructure, 1024);
-static unsigned char ucDMAChannelControlStructure[DMA_CHANNEL_CONTROL_STRUCTURE_SIZE];
-#endif
+static unsigned char ucDMAChannelControlStructure[DMA_CHANNEL_CONTROL_STRUCTURE_SIZE] __attribute__((aligned(1024)));
 
 
 // Static buffer for 5 bytes of SPI HEADER
@@ -455,7 +447,8 @@ int init_spi(void)
     SpiConfigureHwMapping();
 
     // Configure SPI with CC3000
-    SSIConfigure(1000000, 1, 50000000);
+    //SSIConfigure(1000000, 1, 50000000);
+    SSIConfigure(1000000, 1, SysCtlClockGet());
     return(ESUCCESS);
 }
 
@@ -646,7 +639,7 @@ SpiWrite(unsigned char *pUserBuffer, unsigned short usLength)
 
     // Due to the fact that we are currently implementing a blocking situation
     // here we will wait till end of transaction
-    while (eSPI_STATE_IDLE != sSpiInformation.ulSpiState)
+    while (eSPI_STATE_IDLE != sSpiInformation.ulSpiState) // && eSPI_STATE_WRITE_EOT != sSpiInformation.ulSpiState)
     {
         ;
     }
